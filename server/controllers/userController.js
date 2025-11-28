@@ -15,3 +15,16 @@ export const fetchUsers = asyncHandler(async function (req, res, next) {
     users,
   });
 });
+
+export const registerUser = asyncHandler(async function (req, res, next) {
+  const { name, email, password } = req.body;
+
+  const user = await userModel.create({ name, email, password });
+  console.log("user:", user);
+
+  res.status(200).json({
+    success: true,
+    message: "Registered successfully",
+    user,
+  });
+});
