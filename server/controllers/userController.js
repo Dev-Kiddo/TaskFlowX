@@ -19,6 +19,10 @@ export const fetchUsers = asyncHandler(async function (req, res, next) {
 export const registerUser = asyncHandler(async function (req, res, next) {
   const { name, email, password } = req.body;
 
+  // if (!name || !email || !password) {
+  //   return next(new AppError("Please fill all the required fields"));
+  // }
+
   const user = await userModel.create({ name, email, password });
   console.log("user:", user);
 

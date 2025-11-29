@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Usernmame is required"],
+    // required: [true, "Usernmame is required"],
   },
   email: {
     type: String,
@@ -26,8 +26,21 @@ const userSchema = new mongoose.Schema({
       type: String,
     },
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  otp: {
+    type: Number,
+    default: null,
+  },
+  otpExpiry: {
+    type: Date,
+    default: null,
+  },
 });
 
+// Hasing password before save
 userSchema.pre("save", async function () {
   console.log("Middleware: Running before save");
 
