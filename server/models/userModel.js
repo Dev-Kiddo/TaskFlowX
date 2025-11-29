@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    // required: [true, "Usernmame is required"],
+    required: [true, "Usernmame is required"],
   },
   email: {
     type: String,
@@ -30,11 +30,19 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  otp: {
+  verifyOtp: {
     type: Number,
     default: null,
   },
-  otpExpiry: {
+  verifyOtpExpiry: {
+    type: Date,
+    default: null,
+  },
+  resetOtp: {
+    type: Number,
+    default: null,
+  },
+  resetOtpExpiry: {
     type: Date,
     default: null,
   },
@@ -42,11 +50,13 @@ const userSchema = new mongoose.Schema({
 
 // Hasing password before save
 userSchema.pre("save", async function () {
-  console.log("Middleware: Running before save");
-
   if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, 10);
 });
+
+userSchema.methods.verifyPassword = async function (pass) {
+  return await bcrypt.compare(pass, this.password);
+};
 
 export const userModel = mongoose.model("user", userSchema);

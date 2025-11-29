@@ -1,9 +1,12 @@
 import express from "express";
-import { fetchUsers, registerUser } from "../controllers/userController.js";
-import { registerValidator, validate } from "../middlewares/validate.js";
+import { fetchUsers, loginUser, registerUser, resendVerifyOtp, verifyUser } from "../controllers/userController.js";
+import { auth } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.route("/users").get(fetchUsers).post(registerValidator, validate, registerUser);
+router.route("/users").get(fetchUsers).post(registerUser);
+router.route("/verify").post(auth, verifyUser);
+router.route("/resend-otp").get(auth, resendVerifyOtp);
+router.route("/login").post(loginUser);
 
 export default router;
