@@ -149,3 +149,12 @@ export const loginUser = asyncHandler(async function (req, res, next) {
       message: "Login successfully",
     });
 });
+
+export const logoutUser = asyncHandler(async function (req, res, next) {
+  res.cookie("accessToken", null, { expires: new Date(Date.now()) });
+
+  res.status(200).json({
+    success: true,
+    message: "Logout successfully",
+  });
+});
