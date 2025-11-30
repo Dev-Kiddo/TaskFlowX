@@ -4,7 +4,7 @@ import AppError from "../utils/AppError.js";
 import { sendMail } from "../utils/nodeMailer.js";
 import { generateOtp } from "../utils/generateOTP.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export const fetchUsers = asyncHandler(async function (req, res, next) {
   const users = await userModel.find({});
@@ -163,18 +163,108 @@ export const updateUser = asyncHandler(async function (req, res, next) {
     return next(new AppError("User not found, please signup", 401));
   }
 
-  // const updatedUser = await userModel.findByIdAndUpdate(req.user, req.body, { new: true }); 
+  const updatedUser = await userModel.findByIdAndUpdate(req.user, req.body, { new: true });
 
-  if (req.body.name) user.name = req.body.name;
-  if (req.body.email) user.email = req.body.email;
-  if (req.body.password) user.password = req.body.password;
+  // if (req.body.name) user.name = req.body.name;
+  // if (req.body.email) user.email = req.body.email;
+  // if (req.body.password) user.password = req.body.password;
 
   await user.save();
 
   res.status(200).json({
     success: true,
     message: "Updated successfully",
-    user,
+    user: updatedUser,
+  });
+});
+
+export const updateUserPassword = asyncHandler(async function (req, res, next) {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return next(new AppError("All the fields required", 401));
+  }
+
+  const user = await userModel.findById(req.user);
+
+  const verifyPassword = user.verifyPassword(currentPassword);
+
+  if (!verifyPassword) {
+    return next(new AppError("Old password is wrong", 401));
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(new AppError("Password doesn't match", 401));
+  }
+
+  user.password = newPassword;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Password updated successfully",
+  });
+});
+
+export const sendResetLink = asyncHandler(async function (req, res, next) {
+  const { email } = req.body;
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return next(new AppError("This email is not registered", 401));
+  }
+
+  const token = crypto.randomBytes(20).toString("hex");
+
+  const hashToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  user.resetToken = hashToken;
+
+  sendMail(
+    email,
+    "TaskFlowX | Reset Password Link",
+    `<h4>Hi ${user.name}, Reset Your account password</h4>
+       <p>Use the following link to reset your password: <a href=http://localhost:5000/api/v1/reset/${hashToken}>click here</a></p>
+  `
+  );
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Reset OTP sent successfully, Please check your inbox",
+  });
+});
+
+// !
+export const resetUserPassword = asyncHandler(async function (req, res, next) {
+  const token = req.params.id;
+
+  const user = await userModel.findOne({ resetToken: token });
+
+  if (!user) {
+    return next(new AppError("Invalid reset Token", 401));
+  }
+
+  const { newPassword, confirmPassword } = req.body;
+
+  if (newPassword !== confirmPassword) {
+    return next(new AppError("Password doesn't match", 401));
+  }
+
+  user.resetToken = null;
+
+  user.password = newPassword;
+
+  await user.save();
+
+  res.clearCookie("accessToken");
+
+  res.status(200).json({
+    success: true,
+    message: "Password reset successfully",
   });
 });
 
