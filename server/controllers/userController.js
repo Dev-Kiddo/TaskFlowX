@@ -150,8 +150,52 @@ export const loginUser = asyncHandler(async function (req, res, next) {
     });
 });
 
+export const updateUser = asyncHandler(async function (req, res, next) {
+  const user = await userModel.findById(req.user);
+
+  console.log(req.body);
+
+  if (Object.keys(req.body).length === 0) {
+    return next(new AppError("Request Can't be empty", 401));
+  }
+
+  if (!user) {
+    return next(new AppError("User not found, please signup", 401));
+  }
+
+  // const updatedUser = await userModel.findByIdAndUpdate(req.user, req.body, { new: true }); 
+
+  if (req.body.name) user.name = req.body.name;
+  if (req.body.email) user.email = req.body.email;
+  if (req.body.password) user.password = req.body.password;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Updated successfully",
+    user,
+  });
+});
+
+export const deleteUser = asyncHandler(async function (req, res, next) {
+  const user = await userModel.findById(req.user);
+
+  if (!user) {
+    return next(new AppError("User not found, please signup", 401));
+  }
+
+  await userModel.findByIdAndDelete(req.user);
+
+  res.status(200).json({
+    success: true,
+    message: "Deleted successfully",
+  });
+});
+
 export const logoutUser = asyncHandler(async function (req, res, next) {
-  res.cookie("accessToken", null, { expires: new Date(Date.now()) });
+  // res.cookie("accessToken", null, { expires: new Date(Date.now()) });
+  res.clearCookie("accessToken");
 
   res.status(200).json({
     success: true,
