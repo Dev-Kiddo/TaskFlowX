@@ -9,7 +9,7 @@ export const createWorkspace = asyncHandler(async function (req, res, next) {
     name,
     description,
     owner: req.user,
-    member: [req.user],
+    members: [req.user],
   });
 
   res.status(200).json({
@@ -45,4 +45,14 @@ export const inviteWorkSpace = asyncHandler(async function (req, res, next) {
     message: "Member added  successfully",
     workspace,
   });
+});
+
+export const getAllMyWorkSpaces = asyncHandler(async function (req, res, next) {
+  const workspaces = await workSpaceModel.find({ members: req.user });
+
+  console.log(workspaces);
+
+  if (!workspaces) {
+    console.log("No workspaces found");
+  }
 });
