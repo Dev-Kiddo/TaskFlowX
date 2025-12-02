@@ -1,5 +1,6 @@
 import express from "express";
 import userRouter from "./routes/userRoute.js";
+import workSpaceRouter from "./routes/workSpaceRoute.js";
 import { handleError } from "./middlewares/handleError.js";
 import cookieParser from "cookie-parser";
 
@@ -9,6 +10,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/v1", userRouter);
+app.use("/api/v1", workSpaceRouter);
 
 app.use(handleError);
 
