@@ -8,6 +8,7 @@ export const createWorkspace = asyncHandler(async function (req, res, next) {
     name,
     description,
     owner: req.user,
+    member: [req.user],
   });
 
   res.status(200).json({
