@@ -77,3 +77,19 @@ export const removeprojectMember = asyncHandler(async function (req, res, next) 
     project,
   });
 });
+
+export const listProjects = asyncHandler(async function (req, res, next) {
+  const { id } = req.params;
+
+  const project = await projectModel.find({ workSpaceId: id });
+
+  if (!project) {
+    return next(new AppError("Project not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "fetch projects successfully",
+    project,
+  });
+});
