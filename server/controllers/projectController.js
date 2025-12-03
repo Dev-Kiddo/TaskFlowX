@@ -32,7 +32,6 @@ export const addProjectMember = asyncHandler(async function (req, res, next) {
   const { userId } = req.body;
 
   const project = await projectModel.findById(req.params.id);
-  console.log(project);
 
   if (!project) {
     return next(new AppError("Project not found", 404));
@@ -49,6 +48,32 @@ export const addProjectMember = asyncHandler(async function (req, res, next) {
   res.status(200).json({
     success: true,
     message: "member added to a project successfully",
+    project,
+  });
+});
+
+export const removeprojectMember = asyncHandler(async function (req, res, next) {
+  const { userId } = req.body;
+
+  const project = await projectModel.findById(req.params.id);
+
+  if (!project) {
+    return next(new AppError("Project not found", 404));
+  }
+
+  if (!project.members.includes(userId)) {
+    return next(new AppError("This user not exits in this project", 404));
+  }
+
+  const newMembers = project.members.filter((user) => user.toString() !== userId);
+
+  project.members = newMembers;
+
+  await project.save();
+
+  res.status(200).json({
+    success: true,
+    message: "member removed from a project successfully",
     project,
   });
 });
