@@ -5,6 +5,7 @@ import AppError from "../utils/AppError.js";
 
 export const createProject = asyncHandler(async function (req, res, next) {
   const { workspaceId, name, description } = req.body;
+  console.log(req.user);
 
   const workspace = await workSpaceModel.findById(workspaceId);
 
@@ -17,12 +18,37 @@ export const createProject = asyncHandler(async function (req, res, next) {
     name,
     description,
     projectLead: workspace.owner,
-    members: [...workspace.members],
+    members: [req.user],
   });
 
   res.status(200).json({
     success: true,
     message: "Project created successfully",
+    project,
+  });
+});
+
+export const addProjectMember = asyncHandler(async function (req, res, next) {
+  const { userId } = req.body;
+
+  const project = await projectModel.findById(req.params.id);
+  console.log(project);
+
+  if (!project) {
+    return next(new AppError("Project not found", 404));
+  }
+
+  if (project.members.includes(userId)) {
+    return next(new AppError("User already a member in this project", 404));
+  }
+
+  project.members.push(userId);
+
+  await project.save();
+
+  res.status(200).json({
+    success: true,
+    message: "member added to a project successfully",
     project,
   });
 });

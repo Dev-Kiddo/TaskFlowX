@@ -23,6 +23,7 @@ const projectSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.ObjectId,
         ref: "User",
+        required: [true, "need project default member"],
       },
     ],
   },
