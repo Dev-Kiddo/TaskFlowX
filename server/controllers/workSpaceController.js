@@ -24,6 +24,8 @@ export const inviteWorkSpace = asyncHandler(async function (req, res, next) {
 
   const workspace = await workSpaceModel.findById(workspaceId);
 
+  console.log("workspace:", workspace);
+
   if (!workspace) {
     return next(new AppError("Workspace not found", 404));
   }
@@ -53,6 +55,12 @@ export const getAllMyWorkSpaces = asyncHandler(async function (req, res, next) {
   console.log(workspaces);
 
   if (!workspaces) {
-    console.log("No workspaces found");
+    return next(new AppError("Workspace not found", 404));
   }
+
+  res.status(200).json({
+    success: true,
+    message: "Fetch workspaces successfull",
+    workspaces,
+  });
 });
