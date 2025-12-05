@@ -1,4 +1,5 @@
 import { asyncHandler } from "../middlewares/asyncHandler.js";
+import boardModel from "../models/boardModel.js";
 import { projectModel } from "../models/projectModel.js";
 import { workSpaceModel } from "../models/workSpaceModel.js";
 import AppError from "../utils/AppError.js";
@@ -19,6 +20,15 @@ export const createProject = asyncHandler(async function (req, res, next) {
     description,
     projectLead: workspace.owner,
     members: [req.user],
+  });
+
+  await boardModel.create({
+    projectId: project._id,
+    columns: [
+      { title: "To Do", order: 1 },
+      { title: "In Progress", order: 2 },
+      { title: "Done", order: 3 },
+    ],
   });
 
   res.status(200).json({
